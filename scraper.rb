@@ -26,9 +26,10 @@ end until urls.count == 0
 
 
 all_urls.each do |url|
+  if url != "/building-and-development/property-information/planning-building-registers/Pages/town-planning-permits-register-search-results.aspx?appid=349916"
   puts "Fetching #{url}"
   p = agent.get(url)
-
+  
   record = {"info_url" => url, "comment_url" => comment_url, "date_scraped" => Date.today.to_s}
   puts p.at('permit-detail').to_s
   puts '\n'
@@ -60,4 +61,5 @@ all_urls.each do |url|
     end
   end
   ScraperWiki.save_sqlite(['council_reference'], record)
+  end
 end
