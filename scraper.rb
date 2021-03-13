@@ -65,4 +65,5 @@ begin
   end
   rescue => error
 	puts error.to_s
+  end
 end
