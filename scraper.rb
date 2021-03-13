@@ -2,7 +2,7 @@ require 'scraperwiki'
 require 'mechanize'
 
 agent = Mechanize.new
-
+agent.read_timeout = 10
 comment_url = "mailto:planning@melbourne.vic.gov.au"
 base_url = "http://www.melbourne.vic.gov.au/building-and-development/property-information/planning-building-registers/Pages/town-planning-permits-register-search-results.aspx"
 
