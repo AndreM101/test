@@ -1,69 +1,12 @@
 require 'scraperwiki'
-require 'mechanize'
+require 'Date'
 
-agent = Mechanize.new
-agent.read_timeout = 10
-comment_url = "mailto:planning@melbourne.vic.gov.au"
-base_url = "http://www.melbourne.vic.gov.au/building-and-development/property-information/planning-building-registers/Pages/town-planning-permits-register-search-results.aspx"
-
-# Get applications from the last two weeks
-start_date = (Date.today - 14).strftime("%d/%m/%Y")
-end_date = Date.today.strftime("%d/%m/%Y")
-
-page = 1
-all_urls = []
-begin
-  url = "#{base_url}?std=#{start_date}&end=#{end_date}&page=#{page}"
-  puts "Fetching #{url}"
-  p = agent.get(url)
-  urls = p.search('table.permits-list .detail .column1 a').map{|a| a["href"]}
-
-  all_urls += urls
-  page += 1
-  # FIXME: This is just working around an infinite loop that we currently have
-  raise "15 pages processed: aborting due to probably infinite loop" if page == 15
-end until urls.count == 0
-
-
-all_urls.each do |url|
-begin
-  if url != "/building-and-development/property-information/planning-building-registers/Pages/town-planning-permits-register-search-results.aspx?appid=349916"
-  puts "Fetching #{url}"
-  p = agent.get(url)
-  
-  record = {"info_url" => url, "comment_url" => comment_url, "date_scraped" => Date.today.to_s}
-  puts p.at('permit-detail').to_s
-  puts '\n'
-  p.at('.permit-detail').search('tr').each do |tr|
-    puts tr.inner_text
-    heading = tr.at('th').inner_text
-    value = tr.at('td').inner_text
-    case heading
-    when "Application number"
-      record["council_reference"] = value
-    when "Date received"
-      day, month, year = value.split("/")
-      record["date_received"] = Date.new(year.to_i, month.to_i, day.to_i).to_s
-    when "Address"
-      t = value.split("(").first
-      if t
-        record["address"] = t.strip
-      else
-        record["address"] = ""
-      end
-    when "Applicant's Name and Address", "Planning officer", "Objections received", "Application status",
-      "Decision", "Expiry Date", "Change to Application", "VicSmart application", "", "Amendments to permit"
-      # Do nothing with this
-    when "Proposal"
-      record["description"] = value
-    else
-      #Need to find better way to handle exceptions
-      raise "Unexpected #{heading}"
-    end
-  end
-  ScraperWiki.save_sqlite(['council_reference'], record)
-  end
-  rescue => error
-	puts error.to_s
-  end
-end
+record = {}
+record['council_reference'] = '287855'
+record['info_url'] = 'https://epathway.newengland.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryDetailView.aspx?Id=287855'
+record['address'] = '160 Dangar Street, ARMIDALE, NSW 2350'
+record['description'] = 'Alterations & Additions - Demolition of Existing Out Buildings, Erection of New Garage, Carport and Fencing - (Consent Modification)'
+record['date_scraped'] = Date.today.to_s
+record['date_received'] = '2021-05-10'
+record['authority_label'] = 'armidale'
+ScraperWiki.save_sqlite(['council_reference'], record)
