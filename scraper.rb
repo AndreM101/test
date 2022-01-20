@@ -1,5 +1,5 @@
 require 'scraperwiki'
-require 'Date'
+require 'date'
 
 record = {}
 record['council_reference'] = '287855'
